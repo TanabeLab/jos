@@ -10,7 +10,7 @@ from setuptools import setup
 # 下記は入力値
 # ---------------------------
 # MAJOR_MINOR = '0.4.'  # __init__.pyは上書きされる
-new_version = '0.6.0.dev1'
+new_version = '0.6.0.dev2'
 
 if __name__ == '__main__':
     # latest_package =  glob.glob('dist/*.tar')[-1]
