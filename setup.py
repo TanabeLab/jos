@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import os
 from setuptools import setup, find_packages
 
-
 try:
     with open('README.md') as f:
         readme = f.read()
@@ -15,10 +14,12 @@ except IOError:
 here = os.path.dirname(os.path.abspath(__file__))
 initpath = os.path.join(here, "src", 'jos3', '__init__.py')
 
+version = None
 for line in open(initpath):
     if "version" in line:
-        line = line.split('=')[1].strip().replace('"', "").replace("'", "")
-version = line
+        line = line.split('=')[-1].strip().replace('"', "").replace("'", "")
+        version = line
+print(version)
 
 def _requires_from_file(filename):
     return open(filename).read().splitlines()
