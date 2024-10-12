@@ -22,7 +22,7 @@ if __name__ == '__main__':
     #
     with open('src/jos3/__init__.py', 'rt') as f:
         s = f.read().split('\n')
-        s[1] = f'__version__ = "{str(new_version)}"'
+        s[-1] = f'__version__ = "{str(new_version)}"'
 
     with open('src/jos3/__init__.py', 'wt') as f:
         f.write('\n'.join(s))
