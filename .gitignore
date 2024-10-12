@@ -6,3 +6,4 @@ jos3.egg-info/
 .eggs/
 *.csv
 test.py
+*.egg-info

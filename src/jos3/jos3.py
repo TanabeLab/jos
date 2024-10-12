@@ -222,6 +222,8 @@ class JOS3():
         self._posture = "standing"
         self._hc = None
         self._hr = None
+        self._r_t = None  # Total clothing resistance
+        self._r_et = None  # Total clothing evaporative resistance
         self.ex_q = np.zeros(NUM_NODES)
         self._t = dt.timedelta(0) # Elapsed time
         self._cycle = 0 # Cycle time
@@ -341,6 +343,12 @@ class JOS3():
         to = threg.operative_temp(self._ta, self._tr, hc, hr,)
         r_t = threg.dry_r(hc, hr, self._clo, pt=self._atmospheric_pressure)
         r_et = threg.wet_r(hc, self._clo, iclo=self._iclo, pt=self._atmospheric_pressure)
+
+        # Manual setting
+        if self._r_t is not None:
+            r_t = self._r_t.copy()
+        if self._r_et is not None:
+            r_et = self._r_et.copy()
 
         #------------------------------------------------------------------
         # Thermoregulation
@@ -895,6 +903,40 @@ class JOS3():
     def bodytemp(self, inp):
         self._bodytemp = inp.copy()
 
+    @property
+    def r_t(self):
+        """
+        Getter
+
+        Returns
+        -------
+        Rt : numpy.ndarray (17,)
+            Dry heat resistances between the skin and ambience areas by local body segments [K.m2/W].
+            When this parameter is set, the calculations for hc and Icl are not performed, and the value of Rt takes priority.
+        """
+        return self._r_t
+
+    @r_t.setter
+    def r_t(self, inp):
+        self._r_t = _to17array(inp)
+
+    @property
+    def r_et(self):
+        """
+        Getter
+
+        Returns
+        -------
+        Ret : numpy.ndarray (17,)
+            Wet (Evaporative) heat resistances between the skin and ambience areas by local body segments [Pa.m2/W].
+            When this parameter is set, the calculations for hc and Icl are not performed, and the value of Ret takes priority.
+        """
+        return self._r_et
+
+    @r_et.setter
+    def r_et(self, inp):
+        self._r_et = _to17array(inp)
+
     #--------------------------------------------------------------------------
     # Getter
     #--------------------------------------------------------------------------
@@ -921,9 +963,12 @@ class JOS3():
         Rt : numpy.ndarray (17,)
             Dry heat resistances between the skin and ambience areas by local body segments [K.m2/W].
         """
-        hc = threg.fixed_hc(threg.conv_coef(self._posture, self._va, self._ta, self.Tsk,), self._va)
-        hr = threg.fixed_hr(threg.rad_coef(self._posture,))
-        return threg.dry_r(hc, hr, self._clo)
+        if self._r_t:
+            return self._r_t.copy()
+        else:
+            hc = threg.fixed_hc(threg.conv_coef(self._posture, self._va, self._ta, self.Tsk,), self._va)
+            hr = threg.fixed_hr(threg.rad_coef(self._posture,))
+            return threg.dry_r(hc, hr, self._clo)
 
     @property
     def Ret(self):
@@ -935,8 +980,11 @@ class JOS3():
         Ret : numpy.ndarray (17,)
             Wet (Evaporative) heat resistances between the skin and ambience areas by local body segments [Pa.m2/W].
         """
-        hc = threg.fixed_hc(threg.conv_coef(self._posture, self._va, self._ta, self.Tsk,), self._va)
-        return threg.wet_r(hc, self._clo, self._iclo)
+        if self._r_et:
+            return self._r_et.copy()
+        else:
+            hc = threg.fixed_hc(threg.conv_coef(self._posture, self._va, self._ta, self.Tsk,), self._va)
+            return threg.wet_r(hc, self._clo, self._iclo)
 
     @property
     def Wet(self):
