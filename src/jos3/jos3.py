@@ -754,6 +754,13 @@ class JOS3():
         self._ta = _to17array(inp)
 
     @property
+    def tdb(self):
+        return self.Ta
+    @tdb.setter
+    def tdb(self, inp):
+        self.Ta = inp
+
+    @property
     def Tr(self):
         """
         Getter
@@ -767,6 +774,13 @@ class JOS3():
     @Tr.setter
     def Tr(self, inp):
         self._tr = _to17array(inp)
+
+    @property
+    def tr(self):
+        return self.Tr
+    @tr.setter
+    def tr(self, inp):
+        self.Tr = inp
 
     @property
     def To(self):
@@ -788,6 +802,13 @@ class JOS3():
         self._tr = _to17array(inp)
 
     @property
+    def to(self):
+        return self.To
+    @to.setter
+    def to(self, inp):
+        self.To = inp
+
+    @property
     def RH(self):
         """
         Getter
@@ -803,6 +824,13 @@ class JOS3():
         self._rh = _to17array(inp)
 
     @property
+    def rh(self):
+        return self.RH
+    @rh.setter
+    def rh(self, inp):
+        self.RH = inp
+
+    @property
     def Va(self):
         """
         Getter
@@ -816,6 +844,9 @@ class JOS3():
     @Va.setter
     def Va(self, inp):
         self._va = _to17array(inp)
+
+    # @property
+    # def va
 
     @property
     def posture(self):
@@ -1118,6 +1149,49 @@ class JOS3():
                 self._height, self._weight, self._age,
                 self._sex, self._bmr_equation,)
         return bmr / self.BSA.sum()
+
+    @property
+    def tsk(self):
+        return self._bodytemp[INDEX["skin"]].copy()
+
+    @property
+    def hc(self):
+        return threg.fixed_hc(threg.conv_coef(self._posture, self._va, self._ta, self.tsk), self._va)
+
+    @property
+    def hr(self):
+        return threg.fixed_hr(threg.rad_coef(self._posture))
+
+    @property
+    def fcl(self):
+        return threg.clo_area_factor(self._clo)
+
+    @property
+    def r_cl(self):
+        return 0.155 * self._clo.copy()
+
+    @property
+    def r_a(self):
+        return (1 / (self.hc + self.hr)).copy()
+
+    @property
+    def r_t(self):
+        return (self.r_a / self.fcl + self.r_cl).copy()
+
+    @property
+    def tsrf(self):
+        """
+        Skin or clothing surface temperatures by the local body segments [oC].
+
+        Returns
+        -------
+        Tsrf : numpy.ndarray (17,)
+            Skin or clothing skin temperatures by the local body segments [oC].
+        """
+
+
+        to = self.to.copy()
+        return (self.tsk - (self.tsk - to) * self.r_cl / self.r_t).copy()
 
 
 def _to17array(inp):
